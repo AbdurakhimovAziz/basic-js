@@ -1,20 +1,22 @@
 const CustomError = require('../extensions/custom-error');
 
 module.exports = function transform(arr) {
-  let transformedArr = arr ? arr.slice() : [];
-  transformedArr.forEach((element, index) => {
-    if (element === '--discard-next') {
-      transformedArr.splice(index, 2);
+  if (!Array.isArray(arr)) throw new Error();
+
+  const result = arr.reduce((newArr, num, i) => {
+    if (arr[i - 1] === '--discard-next') return newArr;
+    if (arr[i - 1] === '--double-next') newArr.push(arr[i]);
+    if (arr[i + 1] === '--double-prev') newArr.push(arr[i]);
+    if (arr[i + 1] === '--discard-prev') return newArr;
+
+    if (num === '--discard-next' || num === '--double-prev' || num === '--double-next' || num === '--discard-prev') {
+      return newArr;
     }
-    if (element === '--discard-prev') {
-      index === 0 ? transformedArr.splice(index, 1) : transformedArr.splice(index - 1, 2);
-    }
-    if (element === '--double-next') {
-      index === transformedArr.length - 1 ? transformedArr.splice(index, 1) : transformedArr.splice(index, 1, transformedArr[index + 1]);
-    }
-    if (element === '--double-prev') {
-      index === 0 ? transformedArr.splice(index, 1) : transformedArr.splice(index, 1, transformedArr[index - 1]);
-    }
-  });
-  return transformedArr;
+
+    newArr.push(arr[i]);
+
+    return newArr;
+  }, []);
+
+  return result;
 };
