@@ -1,40 +1,46 @@
 const CustomError = require('../extensions/custom-error');
 
 class VigenereCipheringMachine {
-  constructor(flag = true) {
-    this.flag = flag;
+  constructor(mode = true) {
+    this.mode = mode;
+    this.alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+    this.res = '';
+    this.resIndex;
   }
-
   encrypt(message, key) {
-    if (!message || !key) throw new Error('Error');
-    let result = '';
-    let j = 0;
-    key = key.toUpperCase();
-    message = message.toUpperCase();
-    for (let i = 0; i < message.length; i++) {
-      if (message.charCodeAt(i) >= 65 && message.charCodeAt(i) <= 90) {
-        result += String.fromCharCode(((message.charCodeAt(i) + key.charCodeAt(j % key.length) - 130) % 26) + 65);
-        j++;
-      } else result += message[i];
+    this.res = '';
+    let upperMsg = message.toUpperCase();
+    let upperKeys = key.toUpperCase();
+    let pos = 0;
+    for (let i = 0; i < upperMsg.length; i++) {
+      if (!this.alphabet.includes(upperMsg[i])) {
+        this.res += upperMsg[i];
+        continue;
+      }
+      this.resIndex = (this.alphabet.indexOf(upperMsg[i]) + this.alphabet.indexOf(upperKeys[pos])) % this.alphabet.length;
+      pos = ++pos % upperKeys.length;
+      this.res += this.alphabet[this.resIndex];
     }
-    if (this.flag) return result;
-    else return result.split('').reverse().join('');
+    return this.mode ? this.res : this.res.split('').reverse().join('');
+    // remove line with error and write your code here
   }
-
-  decrypt(message, key) {
-    if (!message || !key) throw new Error('Error');
-    let result = '';
-    let j = 0;
-    key = key.toUpperCase();
-    message = message.toUpperCase();
-    for (let i = 0; i < message.length; i++) {
-      if (message.charCodeAt(i) >= 65 && message.charCodeAt(i) <= 90) {
-        result += String.fromCharCode(((message.charCodeAt(i) + 26 - key.charCodeAt(j % key.length)) % 26) + 65);
-        j++;
-      } else result += message[i];
+  decrypt(encryptedMsg, key) {
+    this.res = '';
+    let upperMsg = encryptedMsg.toUpperCase();
+    let upperKeys = key.toUpperCase();
+    let pos = 0;
+    for (let i = 0; i < encryptedMsg.length; i++) {
+      if (!this.alphabet.includes(upperMsg[i])) {
+        this.res += upperMsg[i];
+        continue;
+      }
+      this.resIndex = (this.alphabet.indexOf(encryptedMsg[i]) - this.alphabet.indexOf(upperKeys[pos])) % this.alphabet.length;
+      if (this.resIndex < 0) this.resIndex += this.alphabet.length;
+      pos = ++pos % upperKeys.length;
+      this.res += this.alphabet[this.resIndex];
     }
-    if (this.flag) return result;
-    else return result.split('').reverse().join('');
+    return this.mode ? this.res : this.res.split('').reverse().join('');
+    // remove line with error and write your code here
   }
 }
 
